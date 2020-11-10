@@ -84,6 +84,7 @@ class SwingLeg(object):
         moment_profile = self.leg_moment_profile(t_leg)
         
         # Compute the cost
+        # TODO: the diag gives problems if not square...
         swing_cost = np.cumsum(abs(moment_profile) * t_step, axis=1).diagonal()
         swing_cost.shape = (-1,)
 

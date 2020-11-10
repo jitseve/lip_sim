@@ -138,6 +138,7 @@ class LIP2D(object):
 
     def state_at(self, index=None):
         """
+        Retrieve state at certain index if state is an ndarray.
         TODO: doesn't work yet if cop_pos is an array...
         """
         if index is not None:

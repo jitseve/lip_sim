@@ -17,10 +17,8 @@ def transition_cost(mass, lip_ap, lip_ml, step_pos_ap, step_pos_ml):
         to the leg. Therefore, find a vertical com velocity such that the dot
         product between the leg and the velocity vector is zero.
         The cost is set to infinite for invalid steps, which occurs if the
-        sign of the vertical velocity component is the same before and after
-        transition.
-        TODO: perhaps instead, invalid step is if the foot placement location
-        would be on the same side of the COM as the stance foot.
+        foot placement location would be on the same side of the COM as
+        the stance foot.
     """
 
     if isinstance(lip_ap.com_vel, np.ndarray):
@@ -54,8 +52,12 @@ def transition_cost(mass, lip_ap, lip_ml, step_pos_ap, step_pos_ml):
     sts_cost = 0.5 * mass * (post_vertical_com_vel - pre_vertical_com_vel)
 
     # Set sts cost to infinite for invalid steps
-    mask = np.sign(pre_vertical_com_vel) * np.sign(post_vertical_com_vel) >= 0
-    sts_cost[mask] = np.inf
+    # mask = np.sign(pre_vertical_com_vel) * np.sign(post_vertical_com_vel) >= 0
+    # sts_cost[mask] = np.inf
+    mask = np.logical_or(
+        lip_ap.to_local()[0] * lip_ap.to_local(origin=step_pos_ap)[0] > 0,
+        lip_ml.to_local()[0] * lip_ml.to_local(origin=step_pos_ml)[0] > 0)
+    sts_cost[mask] = 2**64 - 1
 
     # Make scalar if input was also scalar
     if not isinstance(lip_ap.com_vel, np.ndarray):

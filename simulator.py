@@ -1,4 +1,4 @@
-
+import copy
 import numpy as np
 from lip2d import LIP2D
 from swing_leg import SwingLeg
@@ -100,15 +100,14 @@ class Simulator(object):
             
             # Take a data sample for plotting
             self.sim_data.take_sample(
-                self.horizon[index], self.lip_ap, self.lip_ml, index=index)
-            print(self.horizon[index])
-            print(self.lip_ap.state_at(index))
-            print(self.lip_ml.state_at(index))
+                self.horizon[index],
+                self.lip_ap, self.lip_ml,
+                step_pos_ap[index], step_pos_ml[index],
+                index=index)
 
             # Obtain the initial swing leg angle for the next step
             initial_leg_angle_ap = self.lip_ap.to_leg_angle()[index]
             initial_leg_angle_ml = self.lip_ml.to_leg_angle()[index]
-            print(initial_leg_angle_ap)
 
             # Update the models to a new global state
             self.lip_ap.override_state(
@@ -126,4 +125,12 @@ class Simulator(object):
 
         return
 
-    
+
+    def copy_state_to(self, simulation):
+
+        simulation.lip_ap = copy.deepcopy(self.lip_ap)
+        simulation.lip_ml = copy.deepcopy(self.lip_ml)
+        simulation.is_right_swing = self.is_right_swing
+        simulation.swing_leg = copy.deepcopy(self.swing_leg)
+
+        return
