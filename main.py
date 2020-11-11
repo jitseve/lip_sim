@@ -8,7 +8,7 @@ simulations = []
 
 # Baseline simulation to steady state gait
 simulation = Simulator(SimulationSettings)
-simulation.run(n_step=10)
+simulation.run(n_step=SimulationSettings.n_step_to_steady_state)
 simulation.sim_data.plot()
 simulations.append(simulation)
 
@@ -22,7 +22,7 @@ for pert in SimulationSettings.perturbations:
     sim.lip_ml.com_vel += pert
     
     # Simulate another few steps
-    sim.run(n_step=1)
+    sim.run(n_step=SimulationSettings.n_step_post_perturbation)
     sim.sim_data.plot(append_axis=simulation.sim_data.figure.axes[0])
     
     # Store the simulation

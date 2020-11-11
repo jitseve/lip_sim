@@ -33,7 +33,10 @@ class SimulationSettings(object):
 
     gain_swing_cost_ap = 1
     gain_swing_cost_ml = 1
-    gain_sts_cost = 0
-    
+    gain_sts_cost = 0.1
+
+    n_step_to_steady_state = 100
+    n_step_post_perturbation = 1
+
     perturbations = [9.81 * 0.15 * fraction 
         for fraction in [-0.16, -0.12, -0.08, -0.04, 0.04, 0.08, 0.12, 0.16]]

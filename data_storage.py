@@ -80,7 +80,7 @@ class DataStorage(object):
         # XCOM position 
         # ax.plot(self.xcom_pos[1], self.xcom_pos[0], 'xm')
 
-        ax.set_xlim([-0.2, 0.2])
+        ax.set_xlim([-0.3, 0.3])
         ax.set_aspect('equal')
 
         return
