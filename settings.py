@@ -33,7 +33,7 @@ class SimulationSettings(object):
 
     gain_swing_cost_ap = 1
     gain_swing_cost_ml = 1
-    gain_sts_cost = 0.0000000001
+    gain_sts_cost = 0
     
     perturbations = [9.81 * 0.15 * fraction 
         for fraction in [-0.16, -0.12, -0.08, -0.04, 0.04, 0.08, 0.12, 0.16]]

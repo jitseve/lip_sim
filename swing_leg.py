@@ -59,10 +59,10 @@ class SwingLeg(object):
         if isinstance(t_swing, np.ndarray) and len(t_swing.shape) == 1:
             t_swing.shape = (-1, 1)
             is_dimension_adjusted[0] = True
-        if isinstance(t_swing, np.ndarray) and len(initial_angle.shape) == 1:
+        if isinstance(initial_angle, np.ndarray) and len(initial_angle.shape) == 1:
             initial_angle.shape = (-1, 1)
             is_dimension_adjusted[1] = True
-        if isinstance(t_swing, np.ndarray) and len(final_angle.shape) == 1:
+        if isinstance(final_angle, np.ndarray) and len(final_angle.shape) == 1:
             final_angle.shape = (-1, 1)
             is_dimension_adjusted[2] = True
 
