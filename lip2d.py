@@ -30,12 +30,11 @@ class LIP2D(object):
         self.w0 = np.sqrt(gravity / leg_length)
 
         # Model state (global)
-        self.com_pos = None
-        self.com_vel = None
-        self.cop_pos = None
-        self.xcom_pos = None
-        self.leg_angle = None
-        self.override_state(com_pos, com_vel, cop_pos)
+        self.com_pos = com_pos
+        self.com_vel = com_vel
+        self.cop_pos = cop_pos
+        self.xcom_pos = self.to_xcom()
+        self.leg_angle = self.to_leg_angle()
         
         return
 
@@ -127,6 +126,9 @@ class LIP2D(object):
         """
         =INPUT=
             See __init__
+        =NOTES=
+            leg_angle_pre_step can function as initial swing leg angle
+            for the motion post-step
         """
         self.com_pos = com_pos
         self.com_vel = com_vel
@@ -138,6 +140,7 @@ class LIP2D(object):
 
     def state_at(self, index=None):
         """
+        Retrieve state at certain index if state is an ndarray.
         TODO: doesn't work yet if cop_pos is an array...
         """
         if index is not None:

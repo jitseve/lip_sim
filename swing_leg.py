@@ -59,10 +59,10 @@ class SwingLeg(object):
         if isinstance(t_swing, np.ndarray) and len(t_swing.shape) == 1:
             t_swing.shape = (-1, 1)
             is_dimension_adjusted[0] = True
-        if isinstance(t_swing, np.ndarray) and len(initial_angle.shape) == 1:
+        if isinstance(initial_angle, np.ndarray) and len(initial_angle.shape) == 1:
             initial_angle.shape = (-1, 1)
             is_dimension_adjusted[1] = True
-        if isinstance(t_swing, np.ndarray) and len(final_angle.shape) == 1:
+        if isinstance(final_angle, np.ndarray) and len(final_angle.shape) == 1:
             final_angle.shape = (-1, 1)
             is_dimension_adjusted[2] = True
 
@@ -84,6 +84,7 @@ class SwingLeg(object):
         moment_profile = self.leg_moment_profile(t_leg)
         
         # Compute the cost
+        # TODO: the diag gives problems if not square...
         swing_cost = np.cumsum(abs(moment_profile) * t_step, axis=1).diagonal()
         swing_cost.shape = (-1,)
 

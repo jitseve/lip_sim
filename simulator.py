@@ -1,4 +1,4 @@
-
+import copy
 import numpy as np
 from lip2d import LIP2D
 from swing_leg import SwingLeg
@@ -34,7 +34,11 @@ class Simulator(object):
         self.is_right_swing = True
 
         # Create model for the swing leg cost
-        self.swing_leg = SwingLeg(
+        self.swing_leg_ap = SwingLeg(
+            mass=settings.mass_swing_leg,
+            gravity=settings.gravity,
+            leg_length=settings.swing_leg_length)
+        self.swing_leg_ml = SwingLeg(
             mass=settings.mass_swing_leg,
             gravity=settings.gravity,
             leg_length=settings.swing_leg_length)
@@ -51,15 +55,16 @@ class Simulator(object):
         No perturbations, constant COP during LIP swing.
         """
 
-        # Take a data sample for plotting
-        # self.sim_data.take_sample(0, self.lip_ap, self.lip_ml)
-
         # Initial swing leg angle
-        initial_leg_angle_ap = self.lip_ap.to_leg_angle()
-        initial_leg_angle_ml = self.lip_ml.to_leg_angle()
+        initial_leg_angle_ap = self.swing_leg_ap.initial_angle
+        initial_leg_angle_ml = self.swing_leg_ml.initial_angle
+        if initial_leg_angle_ap is None:
+            initial_leg_angle_ap = self.settings.initial_leg_angle_ap
+        if initial_leg_angle_ml is None:
+            initial_leg_angle_ml = self.settings.initial_leg_angle_ml
 
         for _ in range(0, n_step):
-
+            
             # ==Horizon scan==
             # Simulate for each point in the horizon, assuming constant COP
             self.lip_ap.simulate(self.horizon)
@@ -72,15 +77,15 @@ class Simulator(object):
             step_pos_ml = self.lip_ml.step_location_xcom(
                 offset=self.settings.xcom_offset_ml * offset_multiplier_ml)
             
-            # Compute final swing leg angles
+            # Compute possible final swing leg angles based on new foot position
             final_leg_angle_ap = self.lip_ap.to_leg_angle(step_pos_ap)
             final_leg_angle_ml = self.lip_ml.to_leg_angle(step_pos_ml)
             
             # Swing leg cost computation
-            swing_cost_ap = self.swing_leg.compute_swing_cost(
+            swing_cost_ap = self.swing_leg_ap.compute_swing_cost(
                 self.t_step, self.horizon,
                 initial_leg_angle_ap, final_leg_angle_ap)
-            swing_cost_ml = self.swing_leg.compute_swing_cost(
+            swing_cost_ml = self.swing_leg_ml.compute_swing_cost(
                 self.t_step, self.horizon,
                 initial_leg_angle_ml, final_leg_angle_ml)
 
@@ -90,7 +95,8 @@ class Simulator(object):
                 step_pos_ap, step_pos_ml)
 
             # Cost landscape of the horizon
-            total_cost = (self.settings.gain_swing_cost_ap * swing_cost_ap +
+            total_cost = (
+                self.settings.gain_swing_cost_ap * swing_cost_ap +
                 self.settings.gain_swing_cost_ml * swing_cost_ml +
                 self.settings.gain_sts_cost * sts_cost)
 
@@ -100,30 +106,39 @@ class Simulator(object):
             
             # Take a data sample for plotting
             self.sim_data.take_sample(
-                self.horizon[index], self.lip_ap, self.lip_ml, index=index)
-            print(self.horizon[index])
-            print(self.lip_ap.state_at(index))
-            print(self.lip_ml.state_at(index))
+                self.horizon[index],
+                self.lip_ap, self.lip_ml,
+                step_pos_ap[index], step_pos_ml[index],
+                index=index)
 
             # Obtain the initial swing leg angle for the next step
             initial_leg_angle_ap = self.lip_ap.to_leg_angle()[index]
             initial_leg_angle_ml = self.lip_ml.to_leg_angle()[index]
-            print(initial_leg_angle_ap)
+            # TODO: initial_leg_angle should be stored in swing_leg for transfer to new simulation (on copy).
+            # Currently the swing leg angle of the preceding step is used, although that one is the same if steady state gait.
 
             # Update the models to a new global state
             self.lip_ap.override_state(
                 self.lip_ap.com_pos[index],
                 self.lip_ap.com_vel[index],
                 step_pos_ap[index])
-
             self.lip_ml.override_state(
                 self.lip_ml.com_pos[index],
                 self.lip_ml.com_vel[index],
                 step_pos_ml[index])
-
+            
             # Change the leg
             self.is_right_swing = not self.is_right_swing
 
         return
 
-    
+
+    def copy_state_to(self, simulation):
+
+        simulation.lip_ap = copy.deepcopy(self.lip_ap)
+        simulation.lip_ml = copy.deepcopy(self.lip_ml)
+        simulation.is_right_swing = self.is_right_swing
+        simulation.swing_leg_ap = copy.deepcopy(self.swing_leg_ap)
+        simulation.swing_leg_ml = copy.deepcopy(self.swing_leg_ml)
+
+        return
