@@ -8,10 +8,15 @@ from data_storage import DataStorage
 
 class Simulator(object):
     """
-    Class which handles various simulation steps of the LIP
+    Class which handles various simulation steps of the LIP models.
     """
 
     def __init__(self, settings):
+        """
+        Set up the simulation environment and its components.
+        A time horizon scan is used to determine a future step location and time.
+        """
+
         self.settings = settings
 
         # Set array for horizon scan
