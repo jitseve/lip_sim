@@ -5,8 +5,10 @@ import numpy as np
 class SimulationSettings(object):
     """
     =NOTES=
-        t_horizon must be a multiple of t_step
-        perturbations are velocity changes
+        ap: antero-posterior
+        ml: medio-lateral
+        t_horizon must be a multiple of t_step.
+        Perturbations are velocity changes.
     """
 
     gravity = 9.81
