@@ -1,3 +1,11 @@
+"""
+Simulation of 2x2D linear inverted pendula, which are linked in time, to
+mimic walking motion in a horizontal plane. Step location selection is
+according to the XCOM + offset. Step time selection is according to a 
+minimization of the step-to-step transition cost and the swing leg cost,
+given the XCOM-based stepping location.
+"""
+
 
 from settings import SimulationSettings
 from simulator import Simulator

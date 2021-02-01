@@ -99,7 +99,10 @@ class LIP2D(object):
             origin - float or ndarray of shape (N,) or (N, 1) [None]
                 If not provided, the model's COP is used as origin.
         =OUTPUT=
-        TODO
+            com_pos - float or ndarray of shape (N,) or (N, 1)
+                Relative to selected origin
+            xcom_pos - float or ndarray of shape (N,) or (N, 1)
+                Relative to selected origin
         """
         if origin is None:
             return (self.com_pos - self.cop_pos, self.xcom_pos - self.cop_pos)
