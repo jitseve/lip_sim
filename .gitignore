@@ -1,0 +1,9 @@
+<<<<<<< HEAD
+__pycache__/
+.vscode/
+env/
+
+=======
+.vscode/
+__pycache__/
+>>>>>>> 149126fa6255adcebd8c8a3c3ff1837eebf5d539

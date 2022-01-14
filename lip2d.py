@@ -4,7 +4,7 @@ import numpy as np
 
 class LIP2D(object):
 
-    def __init__(self, com_pos, com_vel, cop_pos=0, gravity=9.81, leg_length=1):
+    def __init__(self, com_pos, com_vel, foot_pos=0, cop_origin=0, cop_pos=0, cop_shift=0, gravity=9.81, leg_length=1):
         """
         Two-dimensional linear inverted pendulum (LIP)
 
@@ -14,7 +14,7 @@ class LIP2D(object):
                 Initial center of mass position and velocity. 
                 If ndarray, most be of same dimensions.
             cop_pos - float or ndarray of shape (N,) or (N, 1)
-                Initial center of pressure velocity
+                Initial center of pressure position
                 If ndarray, must be of same dimensions as com_pos and com_vel
             gravity - float [9.81]
                 Gravitational constant
@@ -32,14 +32,16 @@ class LIP2D(object):
         # Model state (global)
         self.com_pos = com_pos
         self.com_vel = com_vel
+        self.cop_origin = cop_origin
         self.cop_pos = cop_pos
+        self.cop_shift = cop_shift
         self.xcom_pos = self.to_xcom()
         self.leg_angle = self.to_leg_angle()
         
         return
 
 
-    def simulate(self, t_step):
+    def simulate(self, t_step, cop_shift=0):
         """
         Simulate the LIP using its equations of motion. For as long as
         cop_pos remains constant, the state at any future or past time
@@ -50,17 +52,22 @@ class LIP2D(object):
                 Time step(s) to simulate over.                
                 If ndarray, com_pos, com_vel, and xcom_pos will take
                 the same dimensions.
+            cop_shift - float
+                Distance over which to shift the COP from its base position
         """
+        self.cop_shift = cop_shift
+        cop_origin = self.cop_origin
+        cop_pos = cop_origin + cop_shift
 
-        com_pos_new = (self.cop_pos
-            + (self.com_pos - self.cop_pos) * np.cosh(self.w0 * t_step)
+        com_pos_new = (cop_pos
+            + (self.com_pos - cop_pos) * np.cosh(self.w0 * t_step)
             + self.com_vel / self.w0 * np.sinh(self.w0 * t_step))
 
         com_vel_new = (
-            (self.com_pos - self.cop_pos) * self.w0 * np.sinh(self.w0 * t_step)
+            (self.com_pos - cop_pos) * self.w0 * np.sinh(self.w0 * t_step)
             + self.com_vel * np.cosh(self.w0 * t_step))
 
-        self.override_state(com_pos_new, com_vel_new, self.cop_pos)
+        self.override_state(com_pos_new, com_vel_new, cop_origin, cop_pos, cop_shift)
 
         return
     
@@ -68,6 +75,7 @@ class LIP2D(object):
     def to_xcom(self):
         """
         Compute and return the XCOM position
+        (Eq 5 Vlutters et al 2017 chapter 9)
         """
         return self.com_pos + self.com_vel / self.w0
 
@@ -86,7 +94,7 @@ class LIP2D(object):
             Counter-clockwise is positive.
         """
         if foot_position is None:
-            foot_position = self.cop_pos
+            foot_position = self.cop_origin
 
         return np.arctan((foot_position - self.com_pos) / self.leg_length)
 
@@ -125,7 +133,7 @@ class LIP2D(object):
         return self.xcom_pos + offset
 
 
-    def override_state(self, com_pos, com_vel, cop_pos):
+    def override_state(self, com_pos, com_vel, cop_origin, cop_pos, cop_shift):
         """
         =INPUT=
             See __init__
@@ -135,7 +143,9 @@ class LIP2D(object):
         """
         self.com_pos = com_pos
         self.com_vel = com_vel
+        self.cop_origin = cop_origin
         self.cop_pos = cop_pos
+        self.cop_shift = cop_shift
         self.xcom_pos = self.to_xcom()
         self.leg_angle = self.to_leg_angle()
         return
@@ -147,8 +157,8 @@ class LIP2D(object):
         TODO: doesn't work yet if cop_pos is an array...
         """
         if index is not None:
-            return (self.com_pos[index], self.com_vel[index], self.cop_pos, self.xcom_pos[index])
+            return (self.com_pos[index], self.com_vel[index], self.cop_origin, self.cop_pos, self.cop_shift, self.xcom_pos[index])
         else:
-            return (self.com_pos, self.com_vel, self.cop_pos, self.xcom_pos)
+            return (self.com_pos, self.com_vel, self.cop_origin, self.cop_pos, self.cop_shift, self.xcom_pos)
 
         
